@@ -1,62 +1,46 @@
 package tusk4;
 
-import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Bank
+class Bank
 {
-    private ConcurrentHashMap<BankAccount, Boolean> accounts;
-
-    public Bank() {
+    private ConcurrentHashMap<Integer, BankAccount> accounts;
+    public Bank()
+    {
         accounts = new ConcurrentHashMap<>();
     }
 
-    public BankAccount createAccount(int balance, int maxBalance) {
-        BankAccount account = new BankAccount(balance, maxBalance);
-        accounts.put(account, true);
-        return account;
+    public synchronized void createAccount(
+                                           int accountId,
+                                           double initialBalance,
+                                           double maxBalance
+                                           )
+    {
+        accounts.put(accountId, new BankAccount(initialBalance, maxBalance));
     }
 
-    public void transaction(BankAccount account, int amount) throws MaxBalanceExceededException, InsufficientFundsException {
-        System.out.println("""
-                выберите операцию:
-                1) Положить деньги на счёт
-                2) Снять деньги со счта
-                """);
-        Scanner sc = new Scanner(System.in);
-        int operationNumber = sc.nextInt();
-        switch (operationNumber)
-        {
-            case 1:
 
-            if (amount > 0)
-            {
-                account.deposit(amount);
-            }
-            else
-            {
-                System.out.println("Вы ввели сумму меньше нуля! Введите правильную сумму!");
-                transaction(account, amount);
-            }
-            case 2:
-                if (amount > 0)
-                {
-                    account.withdraw(amount);
-                }
-                else
-                {
-                    System.out.println("Вы ввели сумму меньше нуля! Введите правильную сумму!");
-                    transaction(account, amount);
-                }
-
-
-
-
-//                catch (InsufficientFundsException | MaxBalanceExceededException e)
-//                    {
-//                        System.out.println(e.getMessage());
-//                    }
+    public synchronized void deposit(int accountId, double amount) throws MaxBalanceExceededException {
+        BankAccount account = accounts.get(accountId);
+        if (account == null) {
+            throw new IllegalArgumentException("Invalid account id!");
         }
+        account.deposit(amount);
     }
 
+    public synchronized void withdraw(int accountId, double amount) throws InsufficientFundsException {
+        BankAccount account = accounts.get(accountId);
+        if (account == null) {
+            throw new IllegalArgumentException("Invalid account id!");
+        }
+        account.withdraw(amount);
+    }
+
+    public synchronized double getBalance(int accountId) {
+        BankAccount account = accounts.get(accountId);
+        if (account == null) {
+            throw new IllegalArgumentException("Invalid account id!");
+        }
+        return account.getBalance();
+    }
 }

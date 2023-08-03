@@ -1,30 +1,29 @@
 package tusk4;
 
-    public class BankAccount
-    {
-        private double balance;
-        private double maxBalance;
-        public BankAccount(double maxBalance, double balance)
-        {
-            this.maxBalance = maxBalance;
-            this.balance = balance;
-        }
+class BankAccount {
+    private double balance;
+    private double maxBalance;
 
-        public synchronized void deposit(int cash) throws MaxBalanceExceededException
-        {
-            if((balance + cash) > maxBalance)
-            {
-                throw new MaxBalanceExceededException("Вы превысили максимально допустимую сумму!");
-            }
-            balance+= cash;
-        }
+    public BankAccount(double balance, double maxBalance) {
+        this.balance = balance;
+        this.maxBalance = maxBalance;
+    }
 
-        public synchronized void withdraw(int cash) throws InsufficientFundsException
-        {
-            if((balance - cash) < 0)
-            {
-                throw new InsufficientFundsException("Ваш баланс меньше допустимого! ");
-            }
-            balance-= cash;
+    public synchronized void deposit(double amount) throws MaxBalanceExceededException {
+        if (balance + amount > maxBalance) {
+            throw new MaxBalanceExceededException("Deposit amount exceeds maximum balance!");
         }
+        balance += amount;
+    }
+
+    public synchronized void withdraw(double amount) throws InsufficientFundsException {
+        if (balance < amount) {
+            throw new InsufficientFundsException("Withdrawal amount exceeds available balance!");
+        }
+        balance -= amount;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
 }

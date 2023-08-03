@@ -8,29 +8,29 @@ public class main
     public static void main(String[] args)
     {
         Bank bank = new Bank();
-        ExecutorService executor = Executors.newFixedThreadPool(10);
 
-        for (int i = 0; i < 10; i++) {
-            BankAccount account = bank.createAccount(0, 10000);
-            for (int j = 0; j < 10; j++) {
-//                int amount = (int)(Math.random() * 1000) - 500;
-                  int amount = (int)(Math.random()*50) +20;
-                executor.submit(() -> {
-                    try {
-                        bank.transaction(account, amount);
+        // Создаем два счета
+        bank.createAccount(1, 1000, 5000);
+        bank.createAccount(2, 2000, 7000);
 
-
-                    } catch (MaxBalanceExceededException e) {
-                        System.out.println("ошибка:" + e.getMessage());
-                    } catch (InsufficientFundsException e) {
-                        System.out.println("ошибка:" + e.getMessage());
-                    }
-                });
-            }
+        // Пополняем первый счет на 1500 и пытаемся пополнить второй на 6000 (превышает максимальный баланс)
+        try {
+            bank.deposit(1, 1500);
+            bank.deposit(2, 6000);
+        } catch (MaxBalanceExceededException e) {
+            System.out.println(e.getMessage());
         }
 
-        executor.shutdown();
+        // Снимаем со второго счета 3000 и пытаемся снять с первого больше, чем есть на счету
+        try {
+            bank.withdraw(2, 3000);
+            bank.withdraw(1, 5000);
+        } catch (InsufficientFundsException e) {
+            System.out.println(e.getMessage());
+        }
+
+        // Получаем балансы обоих счетов
+        System.out.println("Account 1 balance: " + bank.getBalance(1));
+        System.out.println("Account 2 balance: " + bank.getBalance(2));
     }
-
 }
-
